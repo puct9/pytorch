@@ -2,7 +2,8 @@
 import collections
 import functools
 import warnings
-from typing import Any
+from collections.abc import Callable as _Callable
+from typing import Any, ParamSpec as _ParamSpec, TypeVar as _TypeVar
 
 import torch
 from torch.types import _dtype
@@ -47,6 +48,10 @@ def autocast_decorator(autocast_instance, func):
         "@autocast() decorator is not supported in script mode"
     )
     return decorate_autocast
+
+
+_InputT = _ParamSpec("_InputT")
+_RetT = _TypeVar("_RetT")
 
 
 class autocast:
@@ -367,7 +372,7 @@ class autocast:
                     return False
         return False
 
-    def __call__(self, func):
+    def __call__(self, func: _Callable[_InputT, _RetT]) -> _Callable[_InputT, _RetT]:
         if torch._jit_internal.is_scripting():
             return func
         if not callable(func):
